@@ -23,39 +23,7 @@
 							Value="0.99" />
 				</Style>
 			</Panel.Resources>
-			<StackPanel Margin="8">
-				<RadioButton x:Name="ThisWindowMenu"
-							 IsChecked="True"
-							 VerticalContentAlignment="Center">
-					<TextBlock Text="This window" />
-				</RadioButton>
-				<Border Height="4" />
-				<RadioButton VerticalContentAlignment="Center">
-					<TextBlock>
-						<Run>Foreground window</Run>
-						<LineBreak />
-						<Run FontSize="14">(seconds later)</Run>
-					</TextBlock>
-				</RadioButton>
-			</StackPanel>
-			<Button Content="Create new"
-					Click="CreateNew" />
-			<Button Content="Create new and move"
-					Click="CreateNewAndMove" />
-			<Button Content="Switch left"
-					Click="SwitchLeft" />
-			<Button Content="Switch left and move"
-					Click="SwitchLeftAndMove" />
-			<Button Content="Switch right"
-					Click="SwitchRight" />
-			<Button Content="Switch right and move"
-					Click="SwitchRightAndMove" />
-			<Button Content="Pin/Unpin"
-					Click="Pin" />
-			<Button Content="Pin/Unpin (App)"
-					Click="PinApp" />
-			<Button Content="Remove"
-					Click="Remove" />
+			<Button Content="Run" Click="Run" />
 		</StackPanel>
 	</ScrollViewer>
 </Window>
