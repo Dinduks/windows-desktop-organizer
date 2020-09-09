@@ -18,8 +18,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\source\VirtualDesktop.WPF\VirtualDesktop.WPF.csproj" />
-    <ProjectReference Include="..\..\source\VirtualDesktop\VirtualDesktop.csproj" />
+    <PackageReference Include="VirtualDesktop" Version="4.0.0" />
+    <PackageReference Include="VirtualDesktop.WPF" Version="4.0.0" />
   </ItemGroup>
 
   <ItemGroup>
