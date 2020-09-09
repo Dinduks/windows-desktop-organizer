@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Diagnostics;
 using WindowsDesktop;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace VirtualDesktopShowcase
 {
@@ -32,22 +34,46 @@ namespace VirtualDesktopShowcase
 
     private void Run(object sender, RoutedEventArgs e)
     {
-      var position = new Position("Spotify", 5);
-
+      var allWindows = getAllWindows();
       var desktops = VirtualDesktop.GetDesktops();
 
-      var windows = getAllWindows();
-      var spotifyWindow = (windows.Where(w => w.ProcessName == position.NameRegexp)).First();
-      var desktop = desktops[position.TargetDesktop];
-      VirtualDesktopHelper.MoveToDesktop(spotifyWindow.hWnd, desktop);
+      var apps = new List<global::App> {
+        new global::App("brave", 1),
+        new global::App("code", 3),
+        new global::App("chrome", 3),
+        new global::App("discord", 5),
+        new global::App("foobar2000", 2),
+        new global::App("jamm", 4),
+        new global::App("spotify", 2),
+        new global::App("telegram", 4),
+        new global::App("thunderbird", 1),
+        new global::App("twist", 4),
+      };
+
+      // TODO: create desktops if there aren't enough
+
+      apps.ForEach(app =>
+      {
+        var regex = new Regex(app.NameRegexp.ToLower());
+        var windows = (allWindows.Where(w => regex.IsMatch(w.ProcessName.ToLower()))).ToList();
+        windows.ForEach(window =>
+        {
+          var desktop = desktops[app.TargetDesktop - 1];
+          VirtualDesktopHelper.MoveToDesktop(window.hWnd, desktop);
+        });
+      });
     }
 
     private WindowRef[] getAllWindows()
     {
-
       Process[] processlist = Process.GetProcesses();
-      return processlist.Select(process =>
+      return processlist.Where(process => process.MainWindowHandle != IntPtr.Zero).Select(process =>
       {
+        // System.Console.WriteLine("++");
+        // System.Console.WriteLine(process.MainWindowTitle);
+        // System.Console.WriteLine(process.ProcessName);
+        // System.Console.WriteLine(process.MainWindowHandle);
+        // System.Console.WriteLine("++");
         return new WindowRef(process.ProcessName, process.Id, process.MainWindowTitle, process.MainWindowHandle);
       }).ToArray();
     }
@@ -73,12 +99,12 @@ class WindowRef
   }
 }
 
-class Position
+class App
 {
   public string NameRegexp { get; set; }
   public int TargetDesktop { get; set; }
 
-  public Position(string NameRegexp, int TargetDesktop)
+  public App(string NameRegexp, int TargetDesktop)
   {
     this.NameRegexp = NameRegexp;
     this.TargetDesktop = TargetDesktop;
