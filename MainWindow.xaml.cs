@@ -58,24 +58,30 @@ namespace VirtualDesktopShowcase
         var windows = (allWindows.Where(w => regex.IsMatch(w.ProcessName.ToLower()))).ToList();
         windows.ForEach(window =>
         {
-          var desktop = desktops[app.TargetDesktop - 1];
-          VirtualDesktopHelper.MoveToDesktop(window.hWnd, desktop);
+          try
+          {
+            var desktop = desktops[app.TargetDesktop - 1];
+            VirtualDesktopHelper.MoveToDesktop(window.hWnd, desktop);
+          }
+          catch (System.Exception error)
+          {
+            // TODO: add debug logging
+          }
         });
       });
     }
 
-    private WindowRef[] getAllWindows()
+    private List<WindowRef> getAllWindows()
     {
-      Process[] processlist = Process.GetProcesses();
-      return processlist.Where(process => process.MainWindowHandle != IntPtr.Zero).Select(process =>
+      return Process.GetProcesses().SelectMany(process =>
       {
-        // System.Console.WriteLine("++");
-        // System.Console.WriteLine(process.MainWindowTitle);
-        // System.Console.WriteLine(process.ProcessName);
-        // System.Console.WriteLine(process.MainWindowHandle);
-        // System.Console.WriteLine("++");
-        return new WindowRef(process.ProcessName, process.Id, process.MainWindowTitle, process.MainWindowHandle);
-      }).ToArray();
+        return Util.GetRootWindowsOfProcess(process.Id)
+          .Where(hWnd => hWnd != IntPtr.Zero)
+          .Select(hWnd =>
+        {
+          return new WindowRef(process.ProcessName, process.Id, process.MainWindowTitle, hWnd);
+        });
+      }).ToList();
     }
 
     [DllImport("user32.dll")]
