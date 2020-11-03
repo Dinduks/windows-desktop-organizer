@@ -57,11 +57,11 @@ namespace VirtualDesktopShowcase
           new global::App("thunderbird", 1, POSITION_FULLSCREEN),
         }),
           new VDSScreen(1, 1.5, 6, 12, new List<global::App>{
-          new global::App("discord", 3, new Position(1, 0, 11, 2)),
-          new global::App("jamm", 3, new Position(9, 3, 11, 5)),
-          new global::App("telegram", 3, new Position(2, 3, 9, 5)),
-          new global::App("twist", 3, new Position(0, 0, 10, 2)),
-          new global::App("slack", 3, new Position(0, 3, 7, 5)),
+          new global::App("discord", 3, new Position(1, 0, 11, 2), true),
+          new global::App("jamm", 3, new Position(9, 3, 11, 5), true),
+          new global::App("telegram", 3, new Position(2, 3, 9, 5), true),
+          new global::App("twist", 3, new Position(0, 0, 10, 2), true),
+          new global::App("slack", 3, new Position(0, 3, 7, 5), true),
         }),
       };
       // TODO: create desktops if there aren't enough
@@ -91,6 +91,11 @@ namespace VirtualDesktopShowcase
               var windowHeight = (int)(DESKTOP_HEIGHT / ROWS) * (app.Position.Y2 - app.Position.Y1 + 1);
 
               MoveWindow(window.hWnd, WindowXPosition, WindowYPosition, windowWidth, windowHeight, true);
+
+              if (app.Pin)
+              {
+                VirtualDesktop.PinWindow(window.hWnd);
+              }
             }
             catch (System.Exception e)
             {
@@ -146,12 +151,14 @@ class App
   public string NameRegexp { get; set; }
   public int TargetDesktop { get; set; }
   public Position Position { get; set; }
+  public bool Pin { get; set; }
 
-  public App(string NameRegexp, int TargetDesktop, Position Position)
+  public App(string NameRegexp, int TargetDesktop, Position Position, bool pin = false)
   {
     this.NameRegexp = NameRegexp;
     this.TargetDesktop = TargetDesktop;
     this.Position = Position;
+    Pin = pin;
   }
 
   public App(string NameRegexp, int TargetDesktop) : this(NameRegexp, TargetDesktop, null)
