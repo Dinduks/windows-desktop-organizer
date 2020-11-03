@@ -20,9 +20,6 @@ namespace VirtualDesktopShowcase
     private Position POSITION_LEFT = new Position(0, 0, 5, 5);
     private Position POSITION_RIGHT = new Position(6, 0, 11, 5);
 
-    private int DESKTOP_WIDTH = Screen.PrimaryScreen.WorkingArea.Width;
-    private int DESKTOP_HEIGHT = Screen.PrimaryScreen.WorkingArea.Height;
-
     public MainWindow()
     {
       this.InitializeComponent();
@@ -35,7 +32,7 @@ namespace VirtualDesktopShowcase
       {
         await VirtualDesktopProvider.Default.Initialize(TaskScheduler.FromCurrentSynchronizationContext());
       }
-      catch (Exception ex)
+      catch (Exception)
       {
         // MessageBox.Show(ex.Message, "Failed to initialize.");
       }
@@ -49,45 +46,65 @@ namespace VirtualDesktopShowcase
       var allWindows = getAllWindows();
       var desktops = VirtualDesktop.GetDesktops();
 
-      var apps = new List<global::App> {
-        new global::App("brave", 1, POSITION_FULLSCREEN),
-        new global::App("code", 3, POSITION_RIGHT),
-        new global::App("chrome", 3, POSITION_LEFT),
-        new global::App("discord", 5, POSITION_RIGHT),
-        new global::App("foobar2000", 2, POSITION_RIGHT),
-        new global::App("jamm", 4, new Position(10, 0, 11, 5)),
-        new global::App("spotify", 2, POSITION_LEFT),
-        new global::App("telegram", 4, new Position(6, 0, 9, 5)),
-        new global::App("thunderbird", 1, POSITION_FULLSCREEN),
-        new global::App("twist", 4, POSITION_LEFT),
-      };
 
+      var screens = new List<VDSScreen>() {
+        new VDSScreen(0, 1, 6, 12, new List<global::App>{
+          new global::App("brave", 1, POSITION_FULLSCREEN),
+          new global::App("code", 3, POSITION_RIGHT),
+          new global::App("chrome", 3, POSITION_LEFT),
+          new global::App("foobar2000", 2, POSITION_RIGHT),
+          new global::App("spotify", 2, POSITION_LEFT),
+          new global::App("thunderbird", 1, POSITION_FULLSCREEN),
+        }),
+          new VDSScreen(1, 1.5, 6, 12, new List<global::App>{
+          new global::App("discord", 3, new Position(1, 0, 11, 2)),
+          new global::App("jamm", 3, new Position(9, 3, 11, 5)),
+          new global::App("telegram", 3, new Position(2, 3, 9, 5)),
+          new global::App("twist", 3, new Position(0, 0, 10, 2)),
+          new global::App("slack", 3, new Position(0, 3, 7, 5)),
+        }),
+      };
       // TODO: create desktops if there aren't enough
 
-      apps.ForEach(app =>
+      foreach (var screen in screens)
       {
-        var regex = new Regex(app.NameRegexp.ToLower());
-        var windows = (allWindows.Where(w => regex.IsMatch(w.ProcessName.ToLower()))).ToList();
-        windows.ForEach(window =>
+        screen.Apps.ForEach(app =>
         {
-          try
+          var regex = new Regex(app.NameRegexp.ToLower());
+          var windows = (allWindows.Where(w => regex.IsMatch(w.ProcessName.ToLower()))).ToList();
+          windows.ForEach(window =>
           {
-            var desktop = desktops[app.TargetDesktop - 1];
-            VirtualDesktopHelper.MoveToDesktop(window.hWnd, desktop);
+            try
+            {
+              var desktop = desktops[app.TargetDesktop - 1];
+              VirtualDesktopHelper.MoveToDesktop(window.hWnd, desktop);
 
-            if (app.Position == null) return;
-            var WindowXPosition = (DESKTOP_WIDTH / COLUMNS) * app.Position.X1;
-            var WindowYPosition = (DESKTOP_HEIGHT / ROWS) * app.Position.Y1;
-            var windowWidth = (int)(DESKTOP_WIDTH / COLUMNS) * (app.Position.X2 - app.Position.X1 + 1);
-            var windowHeight = (int)(DESKTOP_HEIGHT / ROWS) * (app.Position.Y2 - app.Position.Y1 + 1);
-            MoveWindow(window.hWnd, WindowXPosition, WindowYPosition, windowWidth, windowHeight, true);
-          }
-          catch (System.Exception)
-          {
+              System.Drawing.Rectangle workingArea = Screen.AllScreens[screen.Index].WorkingArea;
+              int DESKTOP_WIDTH = workingArea.Width;
+              int DESKTOP_HEIGHT = workingArea.Height;
+
+              if (app.Position == null) return;
+
+              var WindowXPosition = (int)(workingArea.Left) + (DESKTOP_WIDTH / COLUMNS) * app.Position.X1;
+              var WindowYPosition = (int)(workingArea.Top) + (DESKTOP_HEIGHT / ROWS) * app.Position.Y1;
+              var windowWidth = (int)(DESKTOP_WIDTH / COLUMNS) * (app.Position.X2 - app.Position.X1 + 1);
+              var windowHeight = (int)(DESKTOP_HEIGHT / ROWS) * (app.Position.Y2 - app.Position.Y1 + 1);
+
+              MoveWindow(window.hWnd, WindowXPosition, WindowYPosition, windowWidth, windowHeight, true);
+            }
+            catch (System.Exception e)
+            {
             // TODO: add debug logging
-          }
+            if (!e.Message.Contains("Element not found") && !e.Message.Contains("The group or resource"))
+              {
+                System.Console.WriteLine("====================");
+                System.Console.WriteLine(e.Message);
+                System.Console.WriteLine("====================");
+              }
+            }
+          });
         });
-      });
+      }
     }
 
     private List<WindowRef> getAllWindows()
@@ -151,9 +168,25 @@ class Position
 
   public Position(int x1, int y1, int x2, int y2)
   {
+    if (x2 < x1) throw new Exception($"x2 ({x2}) cannot be lesser than x1 ({x1}).");
+    if (y2 < y1) throw new Exception($"y2 ({y2}) cannot be lesser than y1 ({y1}).");
     X1 = x1;
     Y1 = y1;
     X2 = x2;
     Y2 = y2;
+  }
+}
+
+class VDSScreen
+{
+  public int Index { get; set; }
+  public double HiDPIMultiplier { get; set; }
+  public List<global::App> Apps { get; set; }
+
+  public VDSScreen(int id, double hiDPIMultiplier, int rows, int columns, List<global::App> apps)
+  {
+    Index = id;
+    HiDPIMultiplier = hiDPIMultiplier;
+    Apps = apps;
   }
 }
