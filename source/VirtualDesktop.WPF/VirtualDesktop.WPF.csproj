@@ -1,25 +1,28 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
 
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFrameworks>net472;netcoreapp3.1</TargetFrameworks>
     <UseWPF>true</UseWPF>
+    <Version>4.0.1</Version>
     <Authors>Manato KAMEYA</Authors>
     <Company>grabacr.net</Company>
-    <Product>VirtualDesktop</Product>
     <Description>C# wrapper for IVirtualDesktopManager on Windows 10.</Description>
     <Copyright>Copyright © 2020 Manato KAMEYA</Copyright>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/Grabacr07/VirtualDesktop</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Grabacr07/VirtualDesktop</RepositoryUrl>
+    <Product>VirtualDesktop</Product>
+    <RootNamespace>WindowsDesktop</RootNamespace>
     <PackageTags>Windows;Windows10;Desktop;VirtualDesktop;</PackageTags>
-    <RootNamespace>VirtualDesktopShowcase</RootNamespace>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>bin\Release\$(TargetFramework)\VirtualDesktop.WPF.xml</DocumentationFile>
+    <NoWarn>1701,1702,1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="VirtualDesktop" Version="4.0.0" />
-    <PackageReference Include="VirtualDesktop.WinForms" Version="4.0.0" />
+    <ProjectReference Include="..\VirtualDesktop\VirtualDesktop.csproj" />
   </ItemGroup>
 
   <ItemGroup>
