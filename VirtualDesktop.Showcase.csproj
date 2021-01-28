@@ -18,13 +18,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="VirtualDesktop.WinForms" Version="4.0.0" />
+    <PackageReference Include="VirtualDesktop" Version="4.0.1" />
+    <PackageReference Include="VirtualDesktop.WinForms" Version="4.0.1" />
   </ItemGroup>
 
-  <ItemGroup>
+  <!-- <ItemGroup>
     <ProjectReference Include="..\VirtualDesktop-master\source\VirtualDesktop.WPF\VirtualDesktop.WPF.csproj" />
     <ProjectReference Include="..\VirtualDesktop-master\source\VirtualDesktop\VirtualDesktop.csproj" />
-  </ItemGroup>
+  </ItemGroup> -->
 
   <ItemGroup>
     <None Include="..\..\LICENSE">
